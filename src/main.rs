@@ -1,5 +1,6 @@
 use std::env;
 
+mod tokenizer;
 mod compiler;
 
 fn main() {
@@ -9,7 +10,7 @@ fn main() {
         std::process::exit(1);
     }
 
-    let input = args[1].parse::<i32>().unwrap();
-
-    print!("{}", compiler::compile(input));
+    let input = args[1].clone();
+    let output = compiler::compile(input);
+    println!("{}", output);
 }

@@ -18,6 +18,8 @@ cargo build
 
 assert 0 0
 assert 42 42
-assert -5 -5
+assert 15 "5+10"
+assert 8 "17-9"
+assert 21 "5+20-4"
 
 echo OK
