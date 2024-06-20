@@ -12,6 +12,10 @@ pub fn tokenize(input: &str) -> Vec<Token> {
     let mut chars = input.chars().peekable();
 
     while let Some(c) = chars.next() {
+        if c.is_whitespace() {
+            continue;
+        }
+
         match c {
             '+' => {
                 tokens.push(Token::Add);
@@ -66,6 +70,15 @@ mod tests {
     fn test_tokenize_sub() {
         let input = "123-456".to_string();
         let expected = vec![Token::Int(123), Token::Sub, Token::Int(456)];
+        let actual = tokenize(&input);
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_skip_whitespace() {
+        let input = " 123 + 456 ".to_string();
+        let expected = vec![Token::Int(123), Token::Add, Token::Int(456)];
         let actual = tokenize(&input);
 
         assert_eq!(expected, actual);
