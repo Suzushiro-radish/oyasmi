@@ -4,7 +4,7 @@ assert() {
     input="$2"
 
     ./target/debug/oyasmi "$input" >tmp.wat || exit
-    actual=$(wasmer run tmp.wat || exit)
+    actual=$(wasmtime run tmp.wat || exit)
 
     if [ "$actual" = "$expected" ]; then
         echo "$input => $actual"
@@ -22,5 +22,9 @@ assert 15 "5+10"
 assert 8 "17-9"
 assert 21 "5+20-4"
 assert 21 " 5 +  20 - 4 "
+assert 12 "3 * 4"
+assert 3 "15 / 4"
+assert 9 "1 + 2 * 4"
+assert 5 "2 / 2 + 4"
 
 echo OK

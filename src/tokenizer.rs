@@ -3,6 +3,8 @@
 pub enum Token {
     Add,
     Sub,
+    Mul,
+    Div,
     Int(i32),
 }
 
@@ -23,6 +25,12 @@ pub fn tokenize(input: &str) -> Vec<Token> {
             '-' => {
                 tokens.push(Token::Sub);
             }
+            '*' => {
+                tokens.push(Token::Mul);
+            }
+            '/' => {
+                tokens.push(Token::Div);
+            }
             '0'..='9' => {
                 let mut current_num = String::new();
                 current_num.push(c);
@@ -37,7 +45,9 @@ pub fn tokenize(input: &str) -> Vec<Token> {
                 }
                 tokens.push(Token::Int(current_num.parse().unwrap()));
             },
-            _ => {}
+            _ => {
+                panic!("Unknown character: {}", c);
+            }
         }
     }
 
@@ -70,6 +80,24 @@ mod tests {
     fn test_tokenize_sub() {
         let input = "123-456".to_string();
         let expected = vec![Token::Int(123), Token::Sub, Token::Int(456)];
+        let actual = tokenize(&input);
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_tokenize_mul() {
+        let input = "123*456".to_string();
+        let expected = vec![Token::Int(123), Token::Mul, Token::Int(456)];
+        let actual = tokenize(&input);
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_tokenize_div() {
+        let input = "123/456".to_string();
+        let expected = vec![Token::Int(123), Token::Div, Token::Int(456)];
         let actual = tokenize(&input);
 
         assert_eq!(expected, actual);

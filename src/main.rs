@@ -1,6 +1,9 @@
 use std::env;
 
 mod tokenizer;
+mod ast;
+mod parser;
+mod codegen;
 mod compiler;
 
 fn main() {
