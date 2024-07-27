@@ -5,6 +5,8 @@ pub enum Token {
     Sub,
     Mul,
     Div,
+    Lparen,
+    Rparen,
     Int(i32),
 }
 
@@ -30,6 +32,12 @@ pub fn tokenize(input: &str) -> Vec<Token> {
             }
             '/' => {
                 tokens.push(Token::Div);
+            }
+            '(' => {
+                tokens.push(Token::Lparen);
+            }
+            ')' => {
+                tokens.push(Token::Rparen);
             }
             '0'..='9' => {
                 let mut current_num = String::new();

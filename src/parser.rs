@@ -59,6 +59,14 @@ fn parse_primary(tokens: &mut Peekable<impl Iterator<Item = Token>>) -> Node {
     if let Some(token) = tokens.next() {
         match token {
             Token::Int(n) => Node::Number(n),
+            Token::Lparen => {
+                let node = parse_expression(tokens);
+                if let Some(Token::Rparen) = tokens.next() {
+                    node
+                } else {
+                    panic!("Expected closing parenthesis");
+                }
+            }
             _ => panic!("Unexpected token: {:?}", token),
         }
     } else {
