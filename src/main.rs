@@ -1,10 +1,5 @@
 use std::env;
-
-mod tokenizer;
-mod ast;
-mod parser;
-mod codegen;
-mod compiler;
+use oyasmi::compiler;
 
 fn main() {
     let args = env::args().collect::<Vec<String>>();
