@@ -1,4 +1,3 @@
-
 #[derive(Debug, PartialEq)]
 pub enum Token {
     Add,
@@ -8,6 +7,7 @@ pub enum Token {
     Lparen,
     Rparen,
     Int(i32),
+    Semicolon,
 }
 
 pub fn tokenize(input: &str) -> Vec<Token> {
@@ -39,6 +39,9 @@ pub fn tokenize(input: &str) -> Vec<Token> {
             ')' => {
                 tokens.push(Token::Rparen);
             }
+            ';' => {
+                tokens.push(Token::Semicolon);
+            }
             '0'..='9' => {
                 let mut current_num = String::new();
                 current_num.push(c);
@@ -53,6 +56,7 @@ pub fn tokenize(input: &str) -> Vec<Token> {
                 }
                 tokens.push(Token::Int(current_num.parse().unwrap()));
             },
+
             _ => {
                 panic!("Unknown character: {}", c);
             }

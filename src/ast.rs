@@ -28,3 +28,14 @@ impl Expression {
         }
     }
 }
+
+#[derive(Debug, PartialEq)]
+pub struct Statement {
+    pub node: Node,
+}
+
+impl Statement {
+    pub fn new(node: Node) -> Self {
+        Statement { node }
+    }
+}

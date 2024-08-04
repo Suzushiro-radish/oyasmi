@@ -1,9 +1,33 @@
 use std::iter::Peekable;
 
-use crate::{ast::{Expression, Node, Operator}, tokenizer::Token};
+use crate::{ast::{Expression, Node, Operator, Statement}, tokenizer::Token};
 
-pub fn parse(tokens: &mut Peekable<impl Iterator<Item = Token>>) -> Node {
-    parse_expression(tokens)
+pub fn parse(tokens: &mut Peekable<impl Iterator<Item = Token>>) -> Vec<Statement> {
+    let mut statements = Vec::new();
+
+    while tokens.peek().is_some() {
+        statements.push(parse_statement(tokens));
+    }
+
+    statements
+}
+
+fn parse_statement(tokens: &mut Peekable<impl Iterator<Item = Token>>) -> Statement {
+    let node = parse_expression(tokens);
+
+    if let Some(token) = tokens.peek() {
+        match token {
+            Token::Semicolon => {
+                tokens.next();
+                Statement::new(node)
+            }
+            _ => {
+                panic!("Expected semicolon");
+            }
+        }
+    } else {
+        Statement::new(node)
+    }
 }
 
 fn parse_expression(tokens: &mut Peekable<impl Iterator<Item = Token>>) -> Node {
@@ -83,7 +107,7 @@ mod tests {
     fn test_parse() {
         let mut tokens = vec![Token::Int(1), Token::Add, Token::Int(2)].into_iter().peekable();
         let node = parse(&mut tokens);
-        let expected = Node::Expression(Expression::new(Operator::Add, Node::Number(1), Node::Number(2)));
+        let expected = vec![Statement::new(Node::Expression(Expression::new(Operator::Add, Node::Number(1), Node::Number(2))))];
         assert_eq!(expected, node);
     }
 
