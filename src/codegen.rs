@@ -31,24 +31,25 @@ fn codegen_node(ast: Node, output: &mut String) {
         Node::Number(n) => {
             output.push_str(&format!("    i32.const {}\n", n));
         }
-        Node::Expression(expr) => {
-            codegen_node(*expr.lhs, output);
-            codegen_node(*expr.rhs, output);
-
-            match expr.op {
-                ast::Operator::Add => {
-                    output.push_str("    i32.add\n");
-                }
-                ast::Operator::Sub => {
-                    output.push_str("    i32.sub\n");
-                }
-                ast::Operator::Mul => {
-                    output.push_str("    i32.mul\n");
-                }
-                ast::Operator::Div => {
-                    output.push_str("    i32.div_s\n");
-                }
-            }
+        Node::Add(lhs, rhs) => {
+            codegen_node(*lhs, output);
+            codegen_node(*rhs, output);
+            output.push_str("    i32.add\n");
+        }
+        Node::Sub(lhs, rhs) => {
+            codegen_node(*lhs, output);
+            codegen_node(*rhs, output);
+            output.push_str("    i32.sub\n");
+        }
+        Node::Mul(lhs, rhs) => {
+            codegen_node(*lhs, output);
+            codegen_node(*rhs, output);
+            output.push_str("    i32.mul\n");
+        }
+        Node::Div(lhs, rhs) => {
+            codegen_node(*lhs, output);
+            codegen_node(*rhs, output);
+            output.push_str("    i32.div_s\n");
         }
     }
 }

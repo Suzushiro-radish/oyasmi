@@ -1,6 +1,6 @@
 use std::iter::Peekable;
 
-use crate::{ast::{Expression, Node, Operator, Statement}, tokenizer::Token};
+use crate::{ast::{Node, Statement}, tokenizer::Token};
 
 pub fn parse(tokens: &mut Peekable<impl Iterator<Item = Token>>) -> Vec<Statement> {
     let mut statements = Vec::new();
@@ -38,12 +38,12 @@ fn parse_expression(tokens: &mut Peekable<impl Iterator<Item = Token>>) -> Node 
             Token::Add => {
                 tokens.next();
                 let rhs = parse_mul_div(tokens);
-                node = Node::Expression(Expression::new(Operator::Add, node, rhs));
+                node = Node::Add(node.into(), rhs.into());
             }
             Token::Sub => {
                 tokens.next();
                 let rhs = parse_mul_div(tokens);
-                node = Node::Expression(Expression::new(Operator::Sub, node, rhs));
+                node = Node::Sub(node.into(), rhs.into());
             }
             _ => {
                 break;
@@ -63,12 +63,12 @@ fn parse_mul_div(tokens: &mut Peekable<impl Iterator<Item = Token>>) -> Node {
             Token::Mul => {
                 tokens.next();
                 let rhs = parse_primary(tokens);
-                node = Node::Expression(Expression::new(Operator::Mul, node, rhs));
+                node = Node::Mul(node.into(), rhs.into());
             }
             Token::Div => {
                 tokens.next();
                 let rhs = parse_primary(tokens);
-                node = Node::Expression(Expression::new(Operator::Div, node, rhs));
+                node = Node::Div(node.into(), rhs.into());
             }
             _ => {
                 break;
@@ -107,7 +107,7 @@ mod tests {
     fn test_parse() {
         let mut tokens = vec![Token::Int(1), Token::Add, Token::Int(2)].into_iter().peekable();
         let node = parse(&mut tokens);
-        let expected = vec![Statement::new(Node::Expression(Expression::new(Operator::Add, Node::Number(1), Node::Number(2))))];
+        let expected = vec![Statement::new(Node::Add(Node::Number(1).into(), Node::Number(2).into()))];
         assert_eq!(expected, node);
     }
 
@@ -123,7 +123,7 @@ mod tests {
     fn test_parse_mul_div_mul() {
         let mut tokens = vec![Token::Int(1), Token::Mul, Token::Int(2)].into_iter().peekable();
         let node = parse_mul_div(&mut tokens);
-        let expected = Node::Expression(Expression::new(Operator::Mul, Node::Number(1), Node::Number(2)));
+        let expected = Node::Mul(Node::Number(1).into(), Node::Number(2).into());
         assert_eq!(expected, node);
     }
 
@@ -131,7 +131,7 @@ mod tests {
     fn test_parse_mul_div_div() {
         let mut tokens = vec![Token::Int(1), Token::Div, Token::Int(2), Token::Mul, Token::Int(4)].into_iter().peekable();
         let node = parse_mul_div(&mut tokens);
-        let expected = Node::Expression(Expression::new(Operator::Mul, Node::Expression(Expression::new(Operator::Div, Node::Number(1), Node::Number(2))), Node::Number(4)));
+        let expected = Node::Mul((Node::Div(Node::Number(1).into(), Node::Number(2).into())).into(), Node::Number(4).into());
         assert_eq!(expected, node);
     }
 
@@ -155,7 +155,7 @@ mod tests {
     fn test_parse_expression_add() {
         let mut tokens = vec![Token::Int(1), Token::Add, Token::Int(2)].into_iter().peekable();
         let node = parse_expression(&mut tokens);
-        let expected = Node::Expression(Expression::new(Operator::Add, Node::Number(1), Node::Number(2)));
+        let expected = Node::Add(Node::Number(1).into(), Node::Number(2).into());
         assert_eq!(expected, node);
     }
 
@@ -163,7 +163,7 @@ mod tests {
     fn test_parse_expression_sub() {
         let mut tokens = vec![Token::Int(1), Token::Sub, Token::Int(2)].into_iter().peekable();
         let node = parse_expression(&mut tokens);
-        let expected = Node::Expression(Expression::new(Operator::Sub, Node::Number(1), Node::Number(2)));
+        let expected = Node::Sub(Node::Number(1).into(), Node::Number(2).into());
         assert_eq!(expected, node);
     }
 
@@ -171,7 +171,7 @@ mod tests {
     fn test_parse_expression_mul() {
         let mut tokens = vec![Token::Int(1), Token::Mul, Token::Int(2)].into_iter().peekable();
         let node = parse_expression(&mut tokens);
-        let expected = Node::Expression(Expression::new(Operator::Mul, Node::Number(1), Node::Number(2)));
+        let expected = Node::Mul(Node::Number(1).into(), Node::Number(2).into());
         assert_eq!(expected, node);
     }
 }
