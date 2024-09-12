@@ -8,12 +8,7 @@ pub enum Node {
 }
 
 #[derive(Debug, PartialEq)]
-pub struct Statement {
-    pub node: Node,
-}
-
-impl Statement {
-    pub fn new(node: Node) -> Self {
-        Statement { node }
-    }
+pub enum Statement {
+    Node(Node),
+    Assign(String, Node),
 }

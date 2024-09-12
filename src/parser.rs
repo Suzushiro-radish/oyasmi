@@ -13,23 +13,40 @@ pub fn parse(tokens: &mut Peekable<impl Iterator<Item = Token>>) -> Vec<Statemen
 }
 
 fn parse_statement(tokens: &mut Peekable<impl Iterator<Item = Token>>) -> Statement {
-    let node = parse_expression(tokens);
+    let statement = parse_assign(tokens);
 
     if let Some(token) = tokens.peek() {
         match token {
             Token::Semicolon => {
                 tokens.next();
-                Statement::new(node)
+                statement
             }
-            _ => {
-                panic!("Expected semicolon");
-            }
+            _ => panic!("Expected semicolon"),
         }
     } else {
-        Statement::new(node)
+        statement
     }
 }
 
+/// Parse an assignment or a node
+///
+/// assisgnment = (identifier "=")? expression;
+fn parse_assign(tokens: &mut Peekable<impl Iterator<Item = Token>>) -> Statement {
+    if let Some(Token::Identifier(_)) = tokens.peek() {
+        let name = match tokens.next() {
+            Some(Token::Identifier(name)) => name,
+            _ => panic!("Expected identifier")
+        };
+        tokens.next(); // Consume the assign token
+        Statement::Assign(name, parse_expression(tokens))
+    } else {
+        Statement::Node(parse_expression(tokens))
+    }
+}
+
+/// Parse an expression
+///
+/// expression = mul_div (("+" | "-") mul_div)*;
 fn parse_expression(tokens: &mut Peekable<impl Iterator<Item = Token>>) -> Node {
     let mut node = parse_mul_div(tokens);
 
@@ -105,9 +122,17 @@ mod tests {
 
     #[test]
     fn test_parse() {
-        let mut tokens = vec![Token::Int(1), Token::Add, Token::Int(2)].into_iter().peekable();
+        let mut tokens = vec![Token::Int(1), Token::Add, Token::Int(2), Token::Semicolon].into_iter().peekable();
         let node = parse(&mut tokens);
-        let expected = vec![Statement::new(Node::Add(Node::Number(1).into(), Node::Number(2).into()))];
+        let expected = vec![Statement::Node(Node::Add(Node::Number(1).into(), Node::Number(2).into()))];
+        assert_eq!(expected, node);
+    }
+
+    #[test]
+    fn test_parse_assign() {
+        let mut tokens = vec![Token::Identifier("x".to_string()), Token::Assign, Token::Int(42)].into_iter().peekable();
+        let node = parse_assign(&mut tokens);
+        let expected = Statement::Assign("x".to_string(), Node::Number(42));
         assert_eq!(expected, node);
     }
 

@@ -1,4 +1,4 @@
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Token {
     Add,
     Sub,
@@ -6,6 +6,8 @@ pub enum Token {
     Div,
     Lparen,
     Rparen,
+    Identifier(String),
+    Assign,
     Int(i32),
     Semicolon,
 }
@@ -42,6 +44,9 @@ pub fn tokenize(input: &str) -> Vec<Token> {
             ';' => {
                 tokens.push(Token::Semicolon);
             }
+            '=' => {
+                tokens.push(Token::Assign);
+            }
             '0'..='9' => {
                 let mut current_num = String::new();
                 current_num.push(c);
@@ -55,8 +60,21 @@ pub fn tokenize(input: &str) -> Vec<Token> {
                     }
                 }
                 tokens.push(Token::Int(current_num.parse().unwrap()));
-            },
-
+            }
+            'a'..='z' | 'A'..='Z' => {
+                let mut current_str = String::new();
+                current_str.push(c);
+                while let Some(&c) = chars.peek() {
+                    match c {
+                        'a'..='z' | 'A'..='Z' => {
+                            current_str.push(c);
+                            chars.next();
+                        }
+                        _ => break,
+                    }
+                }
+                tokens.push(Token::Identifier(current_str));
+            }
             _ => {
                 panic!("Unknown character: {}", c);
             }
