@@ -1,5 +1,6 @@
 #[derive(Debug, PartialEq)]
 pub enum Node {
+    Variable(String),
     Number(i32),
     Add(Box<Node>, Box<Node>),
     Sub(Box<Node>, Box<Node>),

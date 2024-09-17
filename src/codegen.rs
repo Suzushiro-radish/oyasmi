@@ -17,9 +17,12 @@ pub fn codegen(statements: Vec<Statement>) -> String {
     let mut body = String::new();
 
     while let Some(statement) = statements.next() {
-        codegen_statement(statement, &mut body, &mut vars);
+        codegen_statement(&statement, &mut body, &mut vars);
 
-        if statements.peek().is_some() {
+        if statements.peek().is_some() && match statement {
+            Statement::Node(_) => true,
+            Statement::Assign(_, _) => false,
+        } {
             body.push_str("    drop\n");
         }
     }
@@ -40,7 +43,7 @@ pub fn codegen(statements: Vec<Statement>) -> String {
     output
 }
 
-fn codegen_statement(stmt: ast::Statement, output: &mut String, vars: &mut HashSet<String>) {
+fn codegen_statement(stmt: &ast::Statement, output: &mut String, vars: &mut HashSet<String>) {
     match stmt {
         Statement::Node(node) => {
             codegen_node(node, output);
@@ -51,35 +54,38 @@ fn codegen_statement(stmt: ast::Statement, output: &mut String, vars: &mut HashS
     }
 }
 
-fn codegen_assign(name: &str, node: Node, output: &mut String, vars: &mut HashSet<String>) {
+fn codegen_assign(name: &str, node: &Node, output: &mut String, vars: &mut HashSet<String>) {
     codegen_node(node, output);
     vars.insert(name.to_string());
     output.push_str(&format!("    local.set ${}\n", name));
 }
 
-fn codegen_node(ast: Node, output: &mut String) {
+fn codegen_node(ast: &Node, output: &mut String) {
     match ast {
+        Node::Variable(name) => {
+            output.push_str(&format!("    local.get ${}\n", name));
+        }
         Node::Number(n) => {
             output.push_str(&format!("    i32.const {}\n", n));
         }
         Node::Add(lhs, rhs) => {
-            codegen_node(*lhs, output);
-            codegen_node(*rhs, output);
+            codegen_node(lhs, output);
+            codegen_node(rhs, output);
             output.push_str("    i32.add\n");
         }
         Node::Sub(lhs, rhs) => {
-            codegen_node(*lhs, output);
-            codegen_node(*rhs, output);
+            codegen_node(lhs, output);
+            codegen_node(rhs, output);
             output.push_str("    i32.sub\n");
         }
         Node::Mul(lhs, rhs) => {
-            codegen_node(*lhs, output);
-            codegen_node(*rhs, output);
+            codegen_node(lhs, output);
+            codegen_node(rhs, output);
             output.push_str("    i32.mul\n");
         }
         Node::Div(lhs, rhs) => {
-            codegen_node(*lhs, output);
-            codegen_node(*rhs, output);
+            codegen_node(lhs, output);
+            codegen_node(rhs, output);
             output.push_str("    i32.div_s\n");
         }
     }

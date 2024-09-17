@@ -33,12 +33,22 @@ fn parse_statement(tokens: &mut Peekable<impl Iterator<Item = Token>>) -> Statem
 /// assisgnment = (identifier "=")? expression;
 fn parse_assign(tokens: &mut Peekable<impl Iterator<Item = Token>>) -> Statement {
     if let Some(Token::Identifier(_)) = tokens.peek() {
+        // Consume the identifier
         let name = match tokens.next() {
             Some(Token::Identifier(name)) => name,
             _ => panic!("Expected identifier")
         };
-        tokens.next(); // Consume the assign token
-        Statement::Assign(name, parse_expression(tokens))
+        // Peek to see if the next token is '='
+        if let Some(Token::Assign) = tokens.peek() {
+            tokens.next(); // Consume the '='
+            Statement::Assign(name, parse_expression(tokens))
+        } else {
+            // Not an assignment, so put back the identifier and parse as expression
+            let mut new_iter = std::iter::once(Token::Identifier(name))
+                .chain(tokens.by_ref())
+                .peekable();
+            Statement::Node(parse_expression(&mut new_iter))
+        }
     } else {
         Statement::Node(parse_expression(tokens))
     }
@@ -100,6 +110,7 @@ fn parse_primary(tokens: &mut Peekable<impl Iterator<Item = Token>>) -> Node {
     if let Some(token) = tokens.next() {
         match token {
             Token::Int(n) => Node::Number(n),
+            Token::Identifier(name) => Node::Variable(name),
             Token::Lparen => {
                 let node = parse_expression(tokens);
                 if let Some(Token::Rparen) = tokens.next() {
@@ -122,9 +133,9 @@ mod tests {
 
     #[test]
     fn test_parse() {
-        let mut tokens = vec![Token::Int(1), Token::Add, Token::Int(2), Token::Semicolon].into_iter().peekable();
+        let mut tokens = vec![Token::Identifier("Test".to_owned()), Token::Add, Token::Int(2), Token::Semicolon].into_iter().peekable();
         let node = parse(&mut tokens);
-        let expected = vec![Statement::Node(Node::Add(Node::Number(1).into(), Node::Number(2).into()))];
+        let expected = vec![Statement::Node(Node::Add(Node::Variable("Test".to_owned()).into(), Node::Number(2).into()))];
         assert_eq!(expected, node);
     }
 

@@ -31,5 +31,7 @@ assert 4 "2 * (2 + 4) / (5 - (1 + 1))"
 assert 1 "2; 1;"
 assert 5 "1 * 8; 20/4"
 assert 1 "a = 1; a"
+assert 35 "a = 15; a + 20"
+assert 12 "a = 4; b = a + 3; b + a + 1"
 
 echo OK
